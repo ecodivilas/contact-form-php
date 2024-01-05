@@ -1,26 +1,64 @@
 <?php
     include('config.php');
 
+    $name = $email = $phonenumber = $message = '';
+    $errors = array('name' => '', 'email' => '', 'phonenumber' => '', 'message' => '');
+
     if(isset($_POST['submit'])){
 
-        $name = $_POST['name'];
-        $email = $_POST['email'];
         $phonenumber = $_POST['phonenumber'];
-        $barangay_id = $_POST['barangay_id'];
+        $message = $_POST['message'];
 
-        // echo $name . $email . $phonenumber . $barangay_id;
-
-        $sql = "INSERT INTO client_contacts (name, email, contact_number, barangay_id)  VALUES ('$name', '$email', '$phonenumber', '$barangay_id') RETURN *";
-
-        if(mysqli_query($con, $sql)) {
-            // Success
-            header('Location: index.php');
-            // echo 'Client Info Successfully Added!';
+        if(empty($_POST['name'])){
+          $errors['name'] = "Name is required <br />";
         } else {
-            echo 'query error: ' . mysqli_error($con);
+          $name = $_POST['name'];
+          if(!preg_match('/^[a-zA-Z\d\s]{8,12}$/', $name)){
+            $errors['name'] = "Name must not contain special characters and atleast 8 and max is 12 <br />";
+          }
         }
 
-        
+        if(empty($_POST['email'])){
+          $errors['email'] = "Email is required <br />";
+        } else {
+          $email = $_POST['email'];
+          if(!filter_var($email, FILTER_VALIDATE_EMAIL)){
+            $errors['email'] = "Should be a valid email <br />";
+          }
+        }
+
+        if(empty($_POST['phonenumber'])){
+          $errors['phonenumber'] = "Phone number is required <br />";
+        } else {
+          $name = $_POST['phonenumber'];
+          if(!preg_match('/^\d{11}$/', $name)){
+            $errors['phonenumber'] = "Name must not contain special characters and atleast 8 and max is 12 <br />";
+          }
+        }
+
+        if(empty($_POST['barangay_id'])){
+          $errors['barangay_id'] = "Barangay is required <br />";
+        } else {
+          $barangay_id = $_POST['barangay_id'];
+        }
+
+        if(empty($_POST['message'])){
+          $errors['message'] = "Message is required <br />";
+        } else {
+          $message = $_POST['message'];
+        }
+
+        if(!array_filter($errors)) {
+          $sql = "INSERT INTO client_contacts (name, email, contact_number, barangay_id)  VALUES ('$name', '$email', '$phonenumber', '$barangay_id')";
+  
+          if(mysqli_query($con, $sql)) {
+              // Success
+              header('Location: index.php');
+              // echo 'Client Info Successfully Added!';
+          } else {
+              echo 'query error: ' . mysqli_error($con);
+          }
+        }
     }
 ?>
 
@@ -29,72 +67,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      background-color: #f4f4f4;
-    }
-
-    .container {
-      max-width: 600px;
-      margin: 20px auto;
-      background-color: #fff;
-      padding: 20px;
-      border-radius: 8px;
-      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    }
-
-    h2 {
-      text-align: center;
-      color: #333;
-    }
-
-    form {
-      display: flex;
-      flex-direction: column;
-    }
-
-    label {
-      margin-bottom: 8px;
-      font-weight: bold;
-    }
-
-    input, textarea {
-      padding: 10px;
-      margin-bottom: 16px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      box-sizing: border-box;
-      width: 100%;
-    }
-
-    button {
-      background-color: #4caf50;
-      color: white;
-      padding: 10px;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      font-size: 16px;
-    }
-
-    button:hover {
-      background-color: #45a049;
-    }
-
-    select {
-        padding: 10px;
-        border: 1px solid #ccc;
-        border-radius: 4px;
-        letter-spacing: 1px;
-        margin-bottom: 15px;
-    }
-  </style>
   <title>Contact Form</title>
   <script type="text/javascript" src="jquery-3.3.1.min.js"></script>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
@@ -102,17 +77,20 @@
     <h2>Contact Us</h2>
     <form action="add.php" method="post">
       <label for="name">Name:</label>
-      <input type="text" id="name" name="name" required>
+      <input type="text" id="name" name="name" value="<?= $name ?>">
+      <div class="error-text"><?= $errors['name']; ?></div>
       
       <label for="email">Email:</label>
-      <input type="email" id="email" name="email" required>
+      <input type="email" id="email" name="email" value="<?= $email ?>">
+      <div class="error-text"><?= $errors['email']; ?></div>
 
       <label for="phonenumber">Phone Number:</label>
-      <input type="phonenumber" id="phonenumber" name="phonenumber" required>
+      <input type="phonenumber" id="phonenumber" name="phonenumber" value="<?= $phonenumber ?>">
+      <div class="error-text"><?= $errors['phonenumber']; ?></div>
 
       <label for="province">Province:</label>
-      <select id="sel_province" name="province" required>
-        <option value="0">Select Province</option>
+      <select id="sel_province" name="province">
+        <option value="">Select Province</option>
 
         <?php
             $province_sql = "SELECT * FROM provinces";
@@ -129,19 +107,20 @@
       </select>
 
       <label for="city">City:</label>
-      <select id="sel_city" name="city" required>
-        <option value="0">Select City</option>
+      <select id="sel_city" name="city">
+        <option value="">Select City</option>
         <!-- Add more options as needed -->
       </select>
 
       <label for="barangay">Barangay:</label>
-      <select id="sel_barangay" name="barangay_id" required>
-        <option value="0">Select Barangay</option>
+      <select id="sel_barangay" name="barangay_id">
+        <option value="">Select Barangay</option>
         <!-- Add more options as needed -->
       </select>
       
       <label for="message">Message:</label>
-      <textarea id="message" name="message" rows="4" required></textarea>
+      <textarea id="message" name="message" rows="4" value="<?= $message ?>"></textarea>
+      <div class="error-text"><?= $errors['message']; ?></div>
 
       <button name="submit" type="submit">Submit</button>
     </form>
@@ -218,3 +197,12 @@
 
 </body>
 </html>
+
+
+<!-- REGEX {
+    telephone: /^\d{11}$/,
+    username: /^[a-z\d]{5,12}$/i,
+    password: /^[\w@-]{8,20}$/,
+    slug: /^[a-z\d-]{8,20}$/,
+    email: /^([a-z\d\.-]+)@([a-z\d-]+)\.([a-z]{2,8})(\.[a-z]{2,8})?$/
+}; -->

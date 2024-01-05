@@ -29,16 +29,16 @@
             <th>City</th>
             <th>Province</th>
         </tr>
-        <tr>
-            <?php foreach($client_contacts as $client): ?>
-            <td><?= $client['name']; ?></td>
-            <td><?= $client['email']; ?></td>
-            <td><?= $client['contact_number']; ?></td>
-            <td><?= $client['barangay_name']; ?></td>
-            <td><?= $client['city_name']; ?></td>
-            <td><?= $client['province_name']; ?></td>
+        <?php foreach($client_contacts as $client): ?>
+            <tr>
+                <td><?= $client['name']; ?></td>
+                <td><?= $client['email']; ?></td>
+                <td><?= $client['contact_number']; ?></td>
+                <td><?= $client['barangay_name']; ?></td>
+                <td><?= $client['city_name']; ?></td>
+                <td><?= $client['province_name']; ?></td>
+            </tr>
             <?php endforeach; ?>
-        </tr>
     </table>
 </head>
 <body>
